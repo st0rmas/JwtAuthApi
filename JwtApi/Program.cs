@@ -1,10 +1,14 @@
 using System.Text;
 using JwtApi;
+using JwtApi.Claims.Handlers;
+using JwtApi.Claims.Requirements;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder();
-
+builder.Services.AddTransient<IAuthorizationHandler, AgeHandler>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 	.AddJwtBearer(options =>
 	{
@@ -17,7 +21,24 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 			ValidateLifetime = true,
 		};
 	});
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+	options.AddPolicy("AdminPolicy", policy =>
+	{
+		policy.RequireRole("admin", "ADMIN");
+	});
+	options.AddPolicy("UserPolicy", policy =>
+	{
+		policy.RequireRole("admin", "ADMIN", "user", "USER");
+	});
+	options.AddPolicy("AdultPolicy", policy =>
+	{
+		policy.Requirements.Add(new AgeRequirement(18));
+	});
+
+});
+	
+	
 builder.Services.AddControllers();
 
 var app = builder.Build();
