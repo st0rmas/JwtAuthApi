@@ -1,15 +1,12 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 
 namespace JwtApi.Controllers;
 
 [Route("api/v1/home")]
-
 public class HomeController : Controller
 {
 	private readonly ILogger<HomeController> _logger;
-
 	public HomeController(ILogger<HomeController> logger)
 	{
 		_logger = logger;
@@ -20,7 +17,6 @@ public class HomeController : Controller
 	/// <returns>authorized or unauthorized</returns>
 	/// <response code="200">Success</response>
 	/// <response code="401">User is unathorized</response>
-	/// <example><code>"0000"</code></example>
 	[ProducesResponseType(typeof(string), 200)]
 	[ProducesResponseType(typeof(string), 401)]
 	[HttpGet("")]
@@ -49,6 +45,7 @@ public class HomeController : Controller
 	{
 		return Content("Admin secured page");
 	}
+	
 	/// <summary>
 	/// Get user secured page. Roles user end admin has an access.
 	/// </summary>
@@ -62,6 +59,7 @@ public class HomeController : Controller
 	{
 		return Content("User secured page");
 	}
+	
 	/// <summary>
 	/// Get page for custom policy with age. Constraint by default = 18. 
 	/// </summary>
@@ -75,5 +73,4 @@ public class HomeController : Controller
 	{
 		return Content("You are an adult");
 	}
-
 }

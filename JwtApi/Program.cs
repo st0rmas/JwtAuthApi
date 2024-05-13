@@ -86,8 +86,6 @@ builder.Services.AddSwaggerGen(options =>
 
 
 });
-
-
 builder.Services.AddControllers();
 
 var app = builder.Build();
@@ -103,7 +101,6 @@ if (app.Environment.IsDevelopment())
 		options.RoutePrefix = string.Empty;
 	});
 }
-
 app.UseStaticFiles();
 app.MapControllers();
 app.UseAuthentication();
