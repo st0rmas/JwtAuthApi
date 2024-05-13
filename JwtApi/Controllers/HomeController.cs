@@ -4,7 +4,8 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace JwtApi.Controllers;
 
-[Route("{controller}")]
+[Route("api/v1/home")]
+
 public class HomeController : Controller
 {
 	private readonly ILogger<HomeController> _logger;
@@ -13,37 +14,63 @@ public class HomeController : Controller
 	{
 		_logger = logger;
 	}
-
+	/// <summary>
+	/// Not secured method. Returns claim "name" from jwt token. If jwt token is null, returns string unauthorized
+	/// </summary>
+	/// <returns>authorized or unauthorized</returns>
+	/// <response code="200">Success</response>
+	/// <response code="401">User is unathorized</response>
+	/// <example><code>"0000"</code></example>
+	[ProducesResponseType(typeof(string), 200)]
+	[ProducesResponseType(typeof(string), 401)]
 	[HttpGet("")]
 	public IActionResult NonSecuredMethod()
 	{
-		return Content("Non secured method");
+		var nameClaim = User.Claims.FirstOrDefault(claim=>claim.Type=="name");
+		Console.WriteLine(nameClaim==null? "yes":"no");
+		if (nameClaim!=null)
+		{
+			var name =  nameClaim.Value;
+			return Content($"Non secured method({name} authorized)");
+		}
+		return Content($"Non secured method (unauthorized)");
 	}
 
+	/// <summary>
+	/// Get admin secured page. Role admin has an access.
+	/// </summary>
+	/// <returns></returns>
+	/// <response code="200">Success</response>
+	/// <response code="401">User is unathorized</response>
 	[HttpGet("admin/secured")]
 	[Authorize(Policy = "AdminPolicy")]
+	[ProducesResponseType(typeof(string), 200)]
 	public IActionResult AdminSecuredMethod()
 	{
-		Console.WriteLine(User.IsInRole("admin"));
-		Console.WriteLine(User.IsInRole("ADMIN"));
-		Console.WriteLine(User.IsInRole("user"));
 		return Content("Admin secured page");
 	}
-	
+	/// <summary>
+	/// Get user secured page. Roles user end admin has an access.
+	/// </summary>
+	/// <returns></returns>
+	/// <response code="200">Success</response>
+	/// <response code="401">User is unathorized</response>
 	[HttpGet("user/secured")]
 	[Authorize(Policy = "UserPolicy")]
+	[ProducesResponseType(typeof(string), 200)]
 	public IActionResult UserSecuredMethod()
 	{
-		var ageClaim = User.FindFirst(claim => claim.Type == "age");
-		int.TryParse(ageClaim.Value, out var age);
-		Console.WriteLine(ageClaim.Value + " " + ageClaim.Type + " " + ageClaim.ValueType);
-		Console.WriteLine(age);
-
 		return Content("User secured page");
 	}
-	
+	/// <summary>
+	/// Get page for custom policy with age. Constraint by default = 18. 
+	/// </summary>
+	/// <returns></returns>
+	/// <response code="200">Success</response>
+	/// <response code="401">User is unathorized</response>
 	[HttpGet("adult/secured")]
 	[Authorize(Policy = "AdultPolicy")]
+	[ProducesResponseType(typeof(string), 200)]
 	public IActionResult AdultSecuredMethod()
 	{
 		return Content("You are an adult");
