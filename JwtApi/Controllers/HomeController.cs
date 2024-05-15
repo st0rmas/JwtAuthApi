@@ -12,65 +12,64 @@ public class HomeController : Controller
 		_logger = logger;
 	}
 	/// <summary>
-	/// Not secured method. Returns claim "name" from jwt token. If jwt token is null, returns string unauthorized
+	/// Публичный метод, доступный всем пользователям
 	/// </summary>
-	/// <returns>authorized or unauthorized</returns>
-	/// <response code="200">Success</response>
-	/// <response code="401">User is unathorized</response>
+	/// <returns>Авторизован или неавторизован пользователь</returns>
+	/// <response code="200">Успешно</response>
+	/// <response code="401">Не авторизован</response>
 	[ProducesResponseType(typeof(string), 200)]
 	[ProducesResponseType(typeof(string), 401)]
 	[HttpGet("")]
 	public IActionResult NonSecuredMethod()
 	{
 		var nameClaim = User.Claims.FirstOrDefault(claim=>claim.Type=="name");
-		Console.WriteLine(nameClaim==null? "yes":"no");
 		if (nameClaim!=null)
 		{
 			var name =  nameClaim.Value;
-			return Content($"Non secured method({name} authorized)");
+			return Content($"Публичный метод (Пользователь {name} авторизован)");
 		}
-		return Content($"Non secured method (unauthorized)");
+		return Content($"Публичный метод (пользователь не авторизован)");
 	}
 
 	/// <summary>
-	/// Get admin secured page. Role admin has an access.
+	/// Метод только для админа
 	/// </summary>
 	/// <returns></returns>
-	/// <response code="200">Success</response>
-	/// <response code="401">User is unathorized</response>
+	/// <response code="200">Успешно</response>
+	/// <response code="401">Не авторизован</response>
 	[HttpGet("admin/secured")]
 	[Authorize(Policy = "AdminPolicy")]
 	[ProducesResponseType(typeof(string), 200)]
 	public IActionResult AdminSecuredMethod()
 	{
-		return Content("Admin secured page");
+		return Content("Защищенная страница админа");
 	}
 	
 	/// <summary>
-	/// Get user secured page. Roles user end admin has an access.
+	/// Метод для обычного пользователя. Доступ есть как у пользователя. так и у админа
 	/// </summary>
 	/// <returns></returns>
-	/// <response code="200">Success</response>
-	/// <response code="401">User is unathorized</response>
+	/// <response code="200">Успешно</response>
+	/// <response code="401">Не авторизован</response>
 	[HttpGet("user/secured")]
 	[Authorize(Policy = "UserPolicy")]
 	[ProducesResponseType(typeof(string), 200)]
 	public IActionResult UserSecuredMethod()
 	{
-		return Content("User secured page");
+		return Content("Защищенная страница пользователя");
 	}
 	
 	/// <summary>
-	/// Get page for custom policy with age. Constraint by default = 18. 
+	/// Защищенный метод для пользователей старше требуемого возраста. Для доступа у пользователя должна быть claim "age". По умолчанию возраст = 18
 	/// </summary>
 	/// <returns></returns>
-	/// <response code="200">Success</response>
-	/// <response code="401">User is unathorized</response>
+	/// <response code="200">Успешно</response>
+	/// <response code="401">Не авторизован</response>
 	[HttpGet("adult/secured")]
 	[Authorize(Policy = "AdultPolicy")]
 	[ProducesResponseType(typeof(string), 200)]
 	public IActionResult AdultSecuredMethod()
 	{
-		return Content("You are an adult");
+		return Content("Страница для совершеннолетних");
 	}
 }
